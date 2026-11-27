@@ -22,3 +22,6 @@ V9.2: 14 mèo phần thưởng (5 Rare, 4 Super Rare, 3 Epic, 2 Ultra Rare), kh�
 - 732 mục từ (480 mới), 24 lĩnh vực, 100 họ từ, 1.464 cụm theo mục; 827 câu luyện hoạt động, 12 Test, 24 đoạn đọc, 140 bài. 64 câu động viên song ngữ; 30 mèo có câu riêng không trùng khi tương tác. Giữ nội dung V9.3 và phần thưởng cũ.
 - Chạy thử cổng 8086. Xem `START_V9_4.md` và `QA_V9_4.md`. Bản công khai riêng, chưa phát hành.
 - Các mục tiêu dài hạn 3.000 từ, 2.000–3.000 câu, 20–30 Test, 100+ đoạn đọc chưa đạt; chưa có kiểm định học thuật độc lập hoặc xác nhận PWA trên thiết bị thật.
+
+## V9.4.3
+Hồ sơ minh họa Nyantoeic: đăng nhập trực tiếp bằng mật khẩu demo đã cấp; lần đầu trên mỗi trình duyệt tự tạo hồ sơ cục bộ. Không có quyền Admin, không phải điểm thật. Tên dành riêng cho minh họa, không dùng để học thật. Giữ showcase.js và các hook khi nâng cấp; cấu trúc Part 6/7 mới cần tích hợp riêng. Nếu đã có hồ sơ cùng tên, dùng mật khẩu hiện có hoặc chức năng quên mật khẩu. Đóng tất cả tab/PWA để cập nhật cache, không xóa dữ liệu trang web.

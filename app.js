@@ -28,7 +28,7 @@ function loadState(){
 let state = loadState();
 let storageWarning = false;
 function save(){
-  try {nyanRewardMilestones();vuMilestones();} catch(e){console.warn("Cat reward check:",e);}
+  try {if(nyanShowcaseEnabled())nyanShowcaseSync();else {nyanRewardMilestones();vuMilestones();}} catch(e){console.warn("Cat reward check:",e);}
   try {platform.storage.save(key,state);queueMicrotask(nyanRewardNotice);}
   catch {storageWarning = true;}
 }
@@ -487,7 +487,7 @@ function newExam(testIndex=0){
 }
 function examHistory(){
   if(!state.history.length)return '';
-  return '<section class="panel exam-history"><h2>Lịch sử luyện đề</h2><p class="muted">Theo dõi điểm từng test 30 câu.</p>'+state.history.slice().reverse().map(h=>'<div class="statrow"><span>'+esc(examTitle(h))+' · '+esc(new Date(h.finishedAt).toLocaleString('vi-VN'))+'</span><b>'+esc(h.score)+'/30 · '+esc(formatDuration(h.duration))+'</b>'+(state.reports[h.id]?'<a class="textlink" href="#insights/'+esc(h.id)+'">Báo cáo</a>':'')+'</div>').join('')+'</section>';
+  return '<section class="panel exam-history"><h2>Lịch sử luyện đề</h2><p class="muted">Theo dõi điểm từng test 30 câu.</p>'+state.history.slice().reverse().map(h=>'<div class="statrow"><span>'+esc(examTitle(h))+' · '+esc(new Date(h.finishedAt).toLocaleString('vi-VN'))+'</span><b>'+esc(h.score)+'/30 · '+(h.showcase?'Minh họa · không đo thời gian':esc(formatDuration(h.duration)))+'</b>'+(state.reports[h.id]?'<a class="textlink" href="#insights/'+esc(h.id)+'">Báo cáo</a>':'')+'</div>').join('')+'</section>';
 }
 function formatDuration(ms){const sec=Math.max(0,Math.floor((Number(ms)||0)/1000));return Math.floor(sec/60)+' phút '+String(sec%60).padStart(2,'0')+' giây';}
 function examRules(compact=false){
@@ -600,6 +600,7 @@ function profilesScreen(mode='login'){
  const register=mode==='register',old=platform.legacyProfiles();
  main.innerHTML='<div class="account-layout"><section class="panel account-panel"><div class="account-intro"><img class="account-cat" src="./assets/nyan-study.svg" alt="" width="108" height="108"><div><div class="eyebrow">NYAN TOEIC · HỌC CÙNG NYAN</div><h1>'+(register?'Tạo tài khoản':'Chào mừng trở lại!')+'</h1><p>'+(register?'Tạo hồ sơ riêng ngay trên thiết bị này.':'Đăng nhập để tiếp tục hành trình học của bạn.')+'</p></div></div><nav class="tabs" aria-label="Tài khoản"><a class="tablink '+(!register?'selected':'')+'" href="#profiles/login">Đăng nhập</a><a class="tablink '+(register?'selected':'')+'" href="#profiles/register">Đăng ký</a></nav><form id="account-form" class="account-form"><label for="account-user">Tên đăng nhập</label><input id="account-user" autocomplete="username" maxlength="30" required placeholder="Ví dụ: nyan123" autocapitalize="none" spellcheck="false"><label for="account-pass">Mật khẩu</label><div class="password-wrap"><input id="account-pass" type="password" autocomplete="'+(register?'new-password':'current-password')+'" required maxlength="128" '+(register?'minlength="8"':'')+'><button type="button" id="password-toggle" class="outline" aria-pressed="false">Hiện</button></div>'+(register?'<p class="muted tiny">Tên 3–30 ký tự không dấu, không phân biệt chữ hoa/thường; không được trùng trên trình duyệt này. Mật khẩu ít nhất 8 ký tự.</p><label for="account-confirm">Nhập lại mật khẩu</label><input type="password" id="account-confirm" autocomplete="new-password" minlength="8" maxlength="128" required><label for="legacy-profile">Dữ liệu học hiện có (không bắt buộc)</label><select id="legacy-profile"><option value="">Bắt đầu hồ sơ mới</option><option value="default">Giữ bản sao tiến độ khách hiện tại</option>'+old.map(p=>'<option value="'+esc(p.id)+'">Dùng hồ sơ V4: '+esc(p.name)+'</option>').join('')+'</select><p class="muted tiny">Chỉ chọn hồ sơ cũ nếu đó là dữ liệu của bạn. Hồ sơ V4 chưa có mật khẩu.</p>':'')+'<button class="btn" type="submit">'+(register?'Tạo tài khoản':'Đăng nhập')+'</button><p id="account-error" class="account-error" role="alert"></p></form>'+(!register?'<a class="textlink" href="#profiles/recover">Quên mật khẩu?</a>':'')+'<a class="account-guest" href="#home">Tiếp tục với tư cách khách '+ic('right')+'</a><p class="muted tiny">Miễn phí · Không cần email · Không kết nối máy chủ tài khoản</p></section>'+accountWarnings()+'</div>';
  const pass=main.querySelector('#account-pass'),toggle=main.querySelector('#password-toggle');toggle.onclick=()=>{const show=pass.type==='password';pass.type=show?'text':'password';toggle.textContent=show?'Ẩn':'Hiện';toggle.setAttribute('aria-pressed',String(show));};
+ if(!register){const note=document.createElement('p');note.className='muted tiny';note.textContent='V9.4.3 · Hồ sơ minh họa Nyantoeic có thể đăng nhập trực tiếp, không cần đăng ký.';main.querySelector('#account-form').before(note);}
  const form=main.querySelector('#account-form');form.onsubmit=async e=>{e.preventDefault();const submit=form.querySelector('[type=submit]'),err=form.querySelector('#account-error');err.textContent='';if(register&&pass.value!==form.querySelector('#account-confirm').value){err.textContent='Hai mật khẩu không khớp.';return;}submit.disabled=true;submit.textContent='Đang xử lý…';try{save();const name=form.querySelector('#account-user').value;if(register)await platform.register(name,pass.value,form.querySelector('#legacy-profile').value);else await platform.login(name,pass.value);location.hash=!register&&name.trim().toLowerCase()==='admin'?'admin':'home';location.reload();}catch(e){err.textContent=e.message||'Không thể xử lý tài khoản.';submit.disabled=false;submit.textContent=register?'Tạo tài khoản':'Đăng nhập';}};
 }
 
@@ -620,6 +621,7 @@ function adminScreen(){
  main.querySelectorAll('.admin-reset form').forEach(form=>form.onsubmit=async e=>{e.preventDefault();const msg=form.querySelector('[role=status]'),btn=form.querySelector('button');const password=form.elements.password.value;if(password!==form.elements.confirm.value){msg.textContent='Hai mật khẩu không khớp.';return;}if(!confirm('Đặt lại mật khẩu tài khoản này? Tiến độ học được giữ nguyên.'))return;btn.disabled=true;try{await platform.resetPassword(form.dataset.account,password);form.reset();msg.textContent='Đã cập nhật mật khẩu.';const note=main.querySelector('.admin-notice b');if(form.dataset.account===activeProfile.id&&note)note.remove();}catch(e){msg.textContent=e.message;}finally{btn.disabled=false;}});
 }
 function renderRoute(){
+  nyanShowcaseBanner();
   const [page='home', id, tab, ruleId, reportId] = location.hash.slice(1).split('/');
   switch(page){
     case '': case 'home': home(); break;

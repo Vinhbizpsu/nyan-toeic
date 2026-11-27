@@ -20,6 +20,7 @@ window.NyanPlatform = (() => {
  async function register(username,password,legacyId=''){
   requireCrypto();const name=String(username).trim(),user=canonical(name);
   if(user==='admin')throw Error('Tên Admin được dành riêng.');
+  if(user==='nyantoeic'&&legacyId)throw Error('Hồ sơ minh họa không nhận dữ liệu học cũ. Hãy đăng nhập trực tiếp.');
   if(!/^[a-zA-Z0-9_.-]{3,30}$/.test(name))throw Error('Tên đăng nhập cần 3–30 ký tự: chữ không dấu, số, dấu chấm, gạch ngang hoặc gạch dưới.');
   if(typeof password!=='string'||password.length<8||password.length>128)throw Error('Mật khẩu cần 8–128 ký tự.');
   const salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16))),iterations=600000,hash=await derive(password,salt,iterations);
@@ -35,7 +36,14 @@ window.NyanPlatform = (() => {
  }
  async function login(username,password){
   requireCrypto();const user=canonical(username);if(typeof password!=='string'||password.length>128)throw Error('Tên đăng nhập hoặc mật khẩu không đúng.');
-  const p=read().profiles.find(p=>hasName(p,user)),a=p?.auth;
+  let p=read().profiles.find(p=>hasName(p,user));
+  // Shared, local demonstration profile; this verifier is public and grants no server privileges.
+  if(!p&&user==='nyantoeic'){
+   const demoSalt='a4e7f0b2f9421da7ed749a8cbd563942',demoHash='88453d2d42e81e4fe8aa6eeacf077a7f53ac1687359bcb28dcb132eb597bf0b7';
+   if(!equal(await derive(password,demoSalt,600000),demoHash))throw Error('Tên đăng nhập hoặc mật khẩu không đúng.');
+   return register('Nyantoeic',password);
+  }
+  const a=p?.auth;
   if(p?.id===ADMIN_ID&&!loopback())throw Error('Quản trị cục bộ chỉ dùng trên localhost.');
   if(!a||a.algorithm!=='PBKDF2-SHA256'||a.iterations!==600000||!/^([0-9a-f]{2}){16}$/.test(a.salt)||!equal(await derive(password,a.salt,a.iterations),a.hash))throw Error('Tên đăng nhập hoặc mật khẩu không đúng.');
   startSession(p.id);

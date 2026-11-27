@@ -7,11 +7,20 @@
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   let elapsed=0,last=performance.now(),blockedBefore=true,round=-1,groupSize=1,visiting=false,serial=0;
   const cats=new Set();
+  const controlsKey=window.NyanPlatform.themeKey().replace('theme','pets.controls');
+  let prefs={size:'auto',eco:false,count:1};try{const p=JSON.parse(localStorage.getItem(controlsKey)||'{}');if(['auto','small','medium','large'].includes(p.size))prefs.size=p.size;prefs.eco=p.eco===true;if(Number.isInteger(p.count))prefs.count=clamp(p.count,0,MAX_CATS);}catch{}groupSize=prefs.count;
+  function persist(){prefs.count=groupSize;try{localStorage.setItem(controlsKey,JSON.stringify(prefs));}catch{}}
+  function ecoMode(){return prefs.eco||groupSize>=25;}
   const sleepKey=window.NyanPlatform.themeKey().replace("theme","pets.sleep");
   let sleeping=false;try{sleeping=localStorage.getItem(sleepKey)==='1';}catch{}
   const toggle=document.querySelector("#pet-toggle");
+  const control=document.createElement('section');control.className='nyan-cat-controls';control.setAttribute('aria-label','Điều khiển mèo');control.innerHTML='<button type="button" class="outline nyan-cat-launch" aria-expanded="false" aria-controls="nyan-cat-panel">🐾 Mèo <span data-cat-count></span></button><div id="nyan-cat-panel" class="nyan-cat-panel" hidden><div class="nyan-cat-heading"><b>Điều khiển mèo</b><button type="button" class="outline" data-cat-act="close" aria-label="Đóng điều khiển mèo">×</button></div><label for="nyan-cat-range">Số mèo gọi <output data-cat-preview></output> / 50</label><input type="range" id="nyan-cat-range" min="0" max="50" step="1" value="1"><div class="nyan-cat-buttons"><button type="button" class="outline" data-cat-delta="-1">−1</button><button type="button" class="outline" data-cat-delta="1">+1</button><button type="button" class="outline" data-cat-delta="5">+5</button><button type="button" class="outline" data-cat-delta="10">+10</button></div><div class="nyan-cat-buttons two"><button type="button" class="btn" data-cat-act="all">Gọi đủ 50</button><button type="button" class="outline" data-cat-act="sleep">Cho mèo ngủ</button><button type="button" class="outline" data-cat-act="zero">Thu hết mèo</button></div><label>Kích thước <select data-cat-size><option value="auto">Tự động</option><option value="small">Nhỏ</option><option value="medium">Vừa</option><option value="large">Lớn</option></select></label><label class="nyan-cat-eco"><input type="checkbox" data-cat-eco> Tiết kiệm hiệu năng</label><small data-cat-status></small><small>Chạm để xem lời động viên; giữ để vuốt ve, kéo để nhấc, nút × để mèo nghỉ. 5 phút đi chơi · 1 phút nghỉ.</small></div>';document.body.append(control);
+  const launch=control.querySelector('.nyan-cat-launch'),panel=control.querySelector('.nyan-cat-panel'),range=control.querySelector('input[type=range]');
+  let sliding=false;
+  const setText=(el,s)=>{if(el.textContent!==s)el.textContent=s;};
   const layer=document.createElement("div");layer.className="nyan-pet-layer";document.body.append(layer);
-  // Coat designs are drawn with replacement; repeats are intentional.
+  function applyPetPrefs(){layer.dataset.size=prefs.size;layer.classList.toggle('nyan-pet-eco',ecoMode());layer.classList.toggle('nyan-pet-crowd',groupSize>=20);}
+  // Prefer unique unlocked coats until the pool is exhausted.
   const coats=[
     {id:'black',name:'Mèo đen',fur:'#484953',body:'#3b3d46',leg:'#444650',tail:'#50515a',belly:'#76757d',mark:'#656570',ink:'#20232b',face:'#f0d89a'},
     {id:'gold',name:'Mèo vàng',fur:'#f5bc75',body:'#e9a65e',leg:'#eeb16b',tail:'#df9751',belly:'#ffe2b1',mark:'#c47b3e',ink:'#65442f',face:'#51382c'},
@@ -45,7 +54,10 @@
     const colors={'#fff0d6':c.fur,'#f5e5c8':c.body,'#e9d7bb':c.leg,'#e8d4b5':c.tail,'#ead7b9':c.tail,'#fff4df':c.belly,'#d6bfa4':c.mark,'#304b3b':c.ink};
     return html.replace(/#(?:fff0d6|f5e5c8|e9d7bb|e8d4b5|ead7b9|fff4df|d6bfa4|304b3b)\b/g,m=>colors[m]);
   }
-  function blocked(){return sleeping||document.documentElement.classList.contains("ui91-focus")||document.documentElement.classList.contains("ui91-quiet")||document.hidden||!!document.querySelector('.exam-grid')||!!document.querySelector('[data-v9-blind]')||/^#(?:profiles|admin)(?:\/|$)/.test(location.hash)||!!document.querySelector('#sidebar')?.classList.contains('open');}
+  function controlBlocked(){return document.documentElement.classList.contains('ui91-focus')||document.documentElement.classList.contains('ui91-quiet')||document.hidden||!!document.querySelector('.exam-grid,[data-v9-blind],dialog[open]')||/^#(?:profiles|admin)(?:\/|$)/.test(location.hash)||!!document.querySelector('#sidebar')?.classList.contains('open');}
+  function blocked(){return sleeping||controlBlocked();}
+  function openControl(open){panel.hidden=!open;launch.setAttribute('aria-expanded',String(open));if(!open)sliding=false;}
+  function updateControl(){const hide=controlBlocked();if(control.hidden!==hide)control.hidden=hide;if(hide&&!panel.hidden)openControl(false);if(!sliding){range.value=String(groupSize);setText(panel.querySelector('[data-cat-preview]'),String(groupSize));}setText(control.querySelector('[data-cat-count]'),String(groupSize));setText(control.querySelector('[data-cat-act=sleep]'),sleeping?'Đánh thức':'Cho mèo ngủ');control.querySelector('[data-cat-size]').value=prefs.size;control.querySelector('[data-cat-eco]').checked=prefs.eco;setText(control.querySelector('[data-cat-status]'),sleeping?'Mèo đang ngủ':visiting?'Đang đi chơi · '+cats.size+' mèo':'Đang nghỉ · số đã chọn áp dụng lượt sau');}
   function createCat(slot){
     const host=document.createElement('div');++serial;const coat=pickCoat();if(typeof v9CatSeen==='function')v9CatSeen(coat.id);
     host.className='nyan-pet';host.hidden=true;host.dataset.pose='walk';host.dataset.slot=String(slot);host.dataset.coat=coat.id;
@@ -73,7 +85,7 @@
     const speed=random(38,59);
     const size=()=>({w:host.offsetWidth||(innerWidth<=600?92:116),h:host.offsetHeight||(innerWidth<=600?82:100)});
     // Viewport coordinates, independent of scroll and content columns. Full sprite stays on-screen.
-    const limits=()=>{const {w,h}=size();return {minX:0,maxX:Math.max(0,document.documentElement.clientWidth-w),minY:0,maxY:Math.max(0,document.documentElement.clientHeight-h)};};
+    const limits=()=>{const {w,h}=size();const top=Math.max(0,document.querySelector('.topbar')?.getBoundingClientRect().bottom||0),nav=document.querySelector('#ui91-bottom'),bottom=nav&&nav.getBoundingClientRect().height>0?nav.getBoundingClientRect().height:0;const maxY=Math.max(0,document.documentElement.clientHeight-h-bottom);return {minX:0,maxX:Math.max(0,document.documentElement.clientWidth-w),minY:Math.min(maxY,top),maxY};};
     function setPose(v){pose=v;host.dataset.pose=v;}
     function paint(){host.style.transform=`translate3d(${Math.round(x)}px,${Math.round(y)}px,0)`;host.style.setProperty('--facing',face);}
     function cancelHold(){const old=held;held=null;host.classList.remove('is-held');if(old&&touch.hasPointerCapture(old.id))try{touch.releasePointerCapture(old.id);}catch{} }
@@ -95,10 +107,10 @@
     function groom(){setPose('groom');poseUntil=elapsed+random(2400,4200);}
     function rest(){setPose('idle');poseUntil=elapsed+random(1300,2000);}
     function show(first=false){if(phase!=='visit')return;host.hidden=false;host.style.opacity='1';if(first){const l=limits(),left=Math.random()<.5;targetX=left?Math.min(l.maxX,random(12,100)):Math.max(0,l.maxX-random(12,100));targetY=random(l.minY,l.maxY);x=reduced.matches?targetX:(left?-size().w-14:l.maxX+size().w+14);y=targetY;face=left?1:-1;entering=!reduced.matches;host.dataset.entering=String(entering);}if(reduced.matches){setPose('idle');}else if(entering){setPose('walk');}else walk();paint();startFrame();}
-    function startFrame(){if(!frame&&!host.hidden&&!blockedBefore)frame=requestAnimationFrame(move);}
+    function startFrame(){if(!frame&&!host.hidden&&!blockedBefore&&!(reduced.matches&&pose==='idle'&&!held))frame=requestAnimationFrame(move);}
     function finish(){if(phase==='done')return;cancelHold();phase='done';stopFrame();host.remove();cats.delete(api);}
     function leave(){if(phase!=='visit')return;cancelHold();if(reduced.matches||blocked()){finish();return;}phase='leaving';entering=false;host.dataset.entering='false';exitAt=elapsed+EXIT_MS;host.classList.add('leaving');targetX=x<innerWidth/2?-(size().w+12):innerWidth+12;face=targetX<x?-1:1;setPose('walk');startFrame();}
-    function move(t){frame=0;if(host.hidden||blockedBefore||phase==='done')return;const dt=lastFrame?Math.min(.05,(t-lastFrame)/1000):0;lastFrame=t;
+    function move(t){frame=0;if(host.hidden||blockedBefore||phase==='done')return;if(ecoMode()&&lastFrame&&t-lastFrame<48){startFrame();return;}const dt=lastFrame?Math.min(.09,(t-lastFrame)/1000):0;lastFrame=t;
       if(phase==='leaving'){const dx=targetX-x;x+=Math.sign(dx)*Math.min(Math.abs(dx),Math.max(180,innerWidth*.65)*dt);if(Math.abs(targetX-x)<1){finish();return;}}
       else if(entering&&!held){const dx=targetX-x,step=Math.min(Math.abs(dx),170*dt);x+=Math.sign(dx)*step;if(Math.abs(targetX-x)<1){entering=false;host.dataset.entering='false';walk();}}
       else if(!held){
@@ -118,10 +130,10 @@
     function update(paused){if(phase==='done')return;if(paused){if(phase==='leaving'){finish();return;}if(!host.hidden){cancelHold();setPose('idle');host.hidden=true;}stopFrame();return;}
       if(phase==='leaving'&&elapsed>=exitAt){finish();return;}
       if(phase==='visit'&&host.hidden)show();startFrame();}
-    touch.addEventListener('click',()=>{if(!held&&typeof ui91CatPhrase==='function')ui91CatPhrase(host);});
-    touch.addEventListener('pointerdown',e=>{if(phase!=='visit'||held||e.button!==0)return;e.preventDefault();entering=false;host.dataset.entering='false';held={id:e.pointerId,sx:e.clientX,sy:e.clientY,drag:false};touch.setPointerCapture(e.pointerId);host.classList.add('is-held');setPose('belly');});
+    touch.addEventListener('click',e=>{if(e.detail===0&&!held&&typeof ui91CatPhrase==='function')ui91CatPhrase(host);});
+    touch.addEventListener('pointerdown',e=>{if(phase!=='visit'||held||e.button!==0)return;e.preventDefault();entering=false;host.dataset.entering='false';held={id:e.pointerId,sx:e.clientX,sy:e.clientY,drag:false,at:performance.now()};try{touch.setPointerCapture(e.pointerId);}catch{}host.classList.add('is-held');setPose('belly');});
     touch.addEventListener('pointermove',e=>{if(!held||held.id!==e.pointerId)return;const dx=e.clientX-held.sx,dy=e.clientY-held.sy;if(!held.drag&&Math.hypot(dx,dy)>10){held.drag=true;setPose('carry');}if(held.drag){const l=limits(),{w,h}=size();x=clamp(e.clientX-w*.5,l.minX,l.maxX);y=clamp(e.clientY-h*.18,l.minY,l.maxY);paint();}});
-    function release(e){if(!held||e.pointerId!==held.id)return;cancelHold();if(phase==='visit'){const l=limits();x=clamp(x,l.minX,l.maxX);y=clamp(y,l.minY,l.maxY);paint();setPose('roll');poseUntil=elapsed+(reduced.matches?0:ROLL_MS);startFrame();}}
+    function release(e){if(!held||e.pointerId!==held.id)return;const tap=e.type==='pointerup'&&!held.drag&&performance.now()-held.at<500;cancelHold();if(phase==='visit'){if(tap&&typeof ui91CatPhrase==='function')ui91CatPhrase(host);const l=limits();x=clamp(x,l.minX,l.maxX);y=clamp(y,l.minY,l.maxY);paint();setPose('roll');poseUntil=elapsed+(reduced.matches?0:ROLL_MS);startFrame();}}
     touch.addEventListener('pointerup',release);touch.addEventListener('pointercancel',release);touch.addEventListener('lostpointercapture',release);
     touch.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.repeat&&phase==='visit'&&!held){e.preventDefault();setPose('belly');}});
     touch.addEventListener('keyup',e=>{if((e.key==='Enter'||e.key===' ')&&phase==='visit'&&!held){e.preventDefault();setPose('roll');poseUntil=elapsed+ROLL_MS;if(typeof ui91CatPhrase==='function')ui91CatPhrase(host);}});
@@ -133,14 +145,25 @@
   }
   let lastProfile=activeProfile.id;
   function tick(){if(lastProfile!==activeProfile.id){lastProfile=activeProfile.id;for(const cat of cats)cat.finish();usedCoats.clear();groupSize=1;round=-1;elapsed=0;blockedBefore=true;last=performance.now();}const now=performance.now(),paused=blocked();if(!paused&&!blockedBefore)elapsed+=Math.max(0,now-last);last=now;blockedBefore=paused;
-    if(paused){for(const cat of cats)cat.update(true);return;}
+    if(paused){for(const cat of cats)cat.update(true);updateControl();return;}
     const current=Math.floor(elapsed/VISIT_EVERY),inVisit=elapsed%VISIT_EVERY<VISIT_LENGTH;
     if(current!==round){for(const cat of cats)cat.finish();round=current;usedCoats.clear();visiting=inVisit;if(inVisit)for(let i=0;i<groupSize;i++)createCat(i);}
     else if(visiting&&!inVisit){visiting=false;for(const cat of cats)cat.leave();}
-    for(const cat of cats)cat.update(false);
+    for(const cat of cats)cat.update(false);updateControl();
   }
-  window.nyanSummonCat=(announce=false)=>{tick();if(blocked()){if(announce)say('Mèo đang nghỉ hoặc bị ẩn bởi chế độ tập trung/giảm chuyển động.');return false;}if(groupSize>=MAX_CATS){if(announce)say('Đã đủ 50 mèo.');return false;}const slot=groupSize++;if(visiting)createCat(slot);if(announce)say(visiting?'Đã gọi thêm một mèo.':'Mèo mới sẽ xuất hiện ở lượt đi chơi tiếp theo.');return true;};
-  window.nyanSummonAllCats=()=>{tick();if(blocked()){say('Mèo đang nghỉ hoặc bị ẩn bởi chế độ tập trung/giảm chuyển động.');return false;}if(groupSize>=MAX_CATS){say('Đã đủ 50 mèo.');return false;}while(groupSize<MAX_CATS){const slot=groupSize++;if(visiting)createCat(slot);}say(visiting?'Đã gọi đủ đàn 50 mèo.':'Đàn 50 mèo sẽ xuất hiện ở lượt đi chơi tiếp theo.');return true;};
+  function setGroup(n,announce=false){tick();if(controlBlocked())return false;const next=clamp(Math.round(Number(n)||0),0,MAX_CATS);if(sleeping&&next>0&&next>=groupSize)toggle.click();groupSize=next;persist();applyPetPrefs();if(visiting&&!blocked()){while(cats.size>next)[...cats].at(-1).finish();while(cats.size<next)createCat(cats.size);}else if(next===0){for(const cat of cats)cat.finish();}for(const cat of cats)cat.resize();updateControl();if(announce)say('Đã chọn '+next+' mèo.'+(visiting?'':' Áp dụng lượt đi chơi tiếp theo.'));return true;}
+  window.nyanSummonCat=(announce=false)=>{if(groupSize>=MAX_CATS){if(announce)say('Đã đủ 50 mèo.');return false;}return setGroup(groupSize+1,announce);};
+  window.nyanSummonAllCats=()=>setGroup(MAX_CATS,true);
+  launch.addEventListener('click',()=>openControl(panel.hidden));
+  control.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.catDelta!==undefined)setGroup(groupSize+Number(b.dataset.catDelta));switch(b.dataset.catAct){case 'close':openControl(false);launch.focus();break;case 'all':setGroup(MAX_CATS,true);break;case 'zero':setGroup(0,true);break;case 'sleep':toggle.click();break;}});
+  range.addEventListener('pointerdown',()=>{sliding=true;});
+  range.addEventListener('input',()=>{sliding=true;setText(panel.querySelector('[data-cat-preview]'),range.value);});
+  range.addEventListener('change',()=>{const next=Number(range.value);sliding=false;setGroup(next,true);});
+  range.addEventListener('pointercancel',()=>{sliding=false;updateControl();});
+  range.addEventListener('blur',()=>{sliding=false;updateControl();});
+  control.querySelector('[data-cat-size]').addEventListener('change',e=>{prefs.size=e.target.value;persist();applyPetPrefs();for(const cat of cats)cat.resize();});
+  control.querySelector('[data-cat-eco]').addEventListener('change',e=>{prefs.eco=e.target.checked;persist();applyPetPrefs();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden){openControl(false);launch.focus();}});
   window.addEventListener('keydown',e=>{
     if(e.defaultPrevented||e.repeat||e.isComposing||!e.ctrlKey||!e.altKey||e.shiftKey||e.metaKey||e.code!=='KeyM'||e.getModifierState('AltGraph'))return;
     if(e.target instanceof Element&&e.target.closest('input,textarea,select,[contenteditable]:not([contenteditable=false])'))return;
@@ -151,7 +174,7 @@
   const main=document.querySelector('main');new MutationObserver(tick).observe(main,{childList:true});
   function renderToggle(){toggle.textContent=sleeping?'Mèo dậy đi chơi':'Mèo đi ngủ';toggle.setAttribute('aria-pressed',String(sleeping));toggle.title=sleeping?'Hiện mèo đi dạo':'Ẩn mèo đi dạo';document.documentElement.classList.toggle('pets-asleep',sleeping);}
   toggle.addEventListener('click',()=>{sleeping=!sleeping;try{localStorage.setItem(sleepKey,sleeping?'1':'0');}catch{}for(const cat of cats)cat.finish();elapsed=0;round=-1;visiting=false;last=performance.now();blockedBefore=true;renderToggle();tick();});
-  renderToggle();setInterval(tick,100);tick();
+  applyPetPrefs();renderToggle();setInterval(tick,100);tick();
   // Hero: crossfade to a hand-drawn happy expression, hearts, gentle squash.
   let heroTimer=0;
   function react(btn,ms=650){clearTimeout(heroTimer);btn.classList.add('is-petted');heroTimer=setTimeout(()=>btn.classList.remove('is-petted'),ms);}

@@ -20,7 +20,7 @@ window.NyanPlatform = (() => {
  async function register(username,password,legacyId=''){
   requireCrypto();const name=String(username).trim(),user=canonical(name);
   if(user==='admin')throw Error('Tên Admin được dành riêng.');
-  if(user==='nyantoeic'&&legacyId)throw Error('Hồ sơ minh họa không nhận dữ liệu học cũ. Hãy đăng nhập trực tiếp.');
+  if(['nyantoeic','xenxinhdep'].includes(user)&&legacyId)throw Error('Hồ sơ minh họa không nhận dữ liệu học cũ. Hãy đăng nhập trực tiếp.');
   if(!/^[a-zA-Z0-9_.-]{3,30}$/.test(name))throw Error('Tên đăng nhập cần 3–30 ký tự: chữ không dấu, số, dấu chấm, gạch ngang hoặc gạch dưới.');
   if(typeof password!=='string'||password.length<8||password.length>128)throw Error('Mật khẩu cần 8–128 ký tự.');
   const salt=bytesToHex(crypto.getRandomValues(new Uint8Array(16))),iterations=600000,hash=await derive(password,salt,iterations);
@@ -42,6 +42,12 @@ window.NyanPlatform = (() => {
    const demoSalt='a4e7f0b2f9421da7ed749a8cbd563942',demoHash='88453d2d42e81e4fe8aa6eeacf077a7f53ac1687359bcb28dcb132eb597bf0b7';
    if(!equal(await derive(password,demoSalt,600000),demoHash))throw Error('Tên đăng nhập hoặc mật khẩu không đúng.');
    return register('Nyantoeic',password);
+  }
+  if(!p&&user==='xenxinhdep'){
+   // Public local cat-only demo credential; no elevated access.
+   const salt='b81a702d0ebae8d47aa9af3e4b86692f',hash='b8bee20fe1dd677e142947edd589fa50c6ea7f15422b14897acb92aeefdf14fb';
+   if(!equal(await derive(password,salt,600000),hash))throw Error('Tên đăng nhập hoặc mật khẩu không đúng.');
+   return register('xenxinhdep',password);
   }
   const a=p?.auth;
   if(p?.id===ADMIN_ID&&!loopback())throw Error('Quản trị cục bộ chỉ dùng trên localhost.');

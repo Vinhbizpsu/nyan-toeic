@@ -291,3 +291,19 @@ html,body,button,input,select,textarea{font-family:var(--font-body);font-variant
 .vu-study{max-width:850px;margin:16px auto;overflow-wrap:anywhere}.vu-study h2{font-size:clamp(1.6rem,4vw,2.3rem);margin:0}.vu-study h3{margin-top:18px}.vu-family-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:10px 0;flex-wrap:wrap}.vu-family-row small{display:block;color:var(--muted)}.vu-family-row p{margin:4px 0}.vu-family-row>div{min-width:0;flex:1}.vu-meaning{margin:8px 0}.vu-quiz-options{display:grid;gap:8px;margin:12px 0}.vu-quiz-options button{text-align:left;white-space:normal;overflow-wrap:anywhere}.vu-prefs{margin:12px 0}.vu-study textarea{display:block;width:100%;max-width:100%;padding:12px;background:var(--card);color:inherit;border:1px solid var(--line);border-radius:10px}.vu-pagination{justify-content:center;margin:20px 0;flex-wrap:wrap}.vu-related{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}.vu-study .actions,.vu-related .actions{flex-wrap:wrap}.vu-study button{max-width:100%}
 
 .nyan-showcase-banner{padding:.65rem 1rem;border:1px solid currentColor;border-radius:.6rem;margin:.5rem 1rem 0;font-size:.83rem;font-weight:650;overflow-wrap:anywhere;}
+
+/* V9.4.5: touch-friendly cat control and optional low-cost motion. */
+.nyan-cat-controls{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:24;display:flex;flex-direction:column;align-items:flex-end;gap:8px;max-width:calc(100vw - 24px)}
+.nyan-cat-controls[hidden],.nyan-cat-panel[hidden]{display:none!important}
+.nyan-cat-launch{min-height:44px;border-radius:999px!important;box-shadow:0 3px 14px #0003;background:var(--white)!important;color:var(--forest)}
+.nyan-cat-panel{order:-1;display:grid;gap:9px;width:min(320px,calc(100vw - 24px));max-height:min(65vh,480px);overflow:auto;overscroll-behavior:contain;padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--white);color:var(--ink);box-shadow:0 8px 28px #0004;font-size:.85rem}
+.nyan-cat-heading{display:flex;justify-content:space-between;align-items:center}
+.nyan-cat-panel button,.nyan-cat-panel select{min-height:44px;touch-action:manipulation}.nyan-cat-panel input[type=range]{width:100%;min-height:32px;accent-color:var(--forest);touch-action:pan-y}
+.nyan-cat-buttons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.nyan-cat-buttons.two{grid-template-columns:repeat(2,minmax(0,1fr))}.nyan-cat-panel small{color:var(--muted);line-height:1.4}.nyan-cat-eco{display:flex;gap:7px;align-items:center}
+.nyan-pet-layer[data-size=small] .nyan-pet,.nyan-pet-layer[data-size=auto].nyan-pet-crowd .nyan-pet{width:72px;height:64px}
+.nyan-pet-layer[data-size=medium] .nyan-pet{width:100px;height:88px}
+.nyan-pet-layer[data-size=large] .nyan-pet{width:140px;height:120px}
+.nyan-pet-layer.nyan-pet-eco .nyan-pet *{animation-duration:1.5s!important;animation-iteration-count:1!important;transition:none!important}
+@media(max-width:760px){.nyan-cat-controls{bottom:calc(76px + env(safe-area-inset-bottom));right:max(8px,env(safe-area-inset-right))}.nyan-cat-panel{max-height:54vh}.nyan-pet-layer[data-size=auto].nyan-pet-crowd .nyan-pet{width:60px;height:54px}}
+@media(hover:none){.nyan-pet .pet-touch{-webkit-touch-callout:none}.nyan-pet .pet-dismiss{width:30px;height:30px}}
+@media(max-height:500px){.nyan-cat-panel{max-height:42vh}}

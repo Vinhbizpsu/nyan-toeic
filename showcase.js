@@ -1,5 +1,12 @@
 /* V9.4.3: local showcase, never admin or real test performance. */
 function nyanShowcaseEnabled(){return activeProfile.id!=='default'&&activeProfile.role==='learner'&&(activeProfile.name.trim().toLowerCase()==='nyantoeic'||(['nyan-demo','nyan-showcase'].includes(activeProfile.name.trim().toLowerCase())&&state.showcase?.version===1));}
+function nyanCatOnlyEnabled(){return activeProfile.id!=='default'&&activeProfile.role==='learner'&&activeProfile.name.trim().toLowerCase()==='xenxinhdep';}
+function nyanCatOnlySync(){
+ if(!nyanCatOnlyEnabled())return;
+ const r=nyanRewards(),at=Date.now();
+ for(const c of nyanRareCats)r.owned[c.id] ||= {at,label:'Mở khóa mèo minh họa',showcase:true};
+ // Basic coats are available from the start; do not invent study activity or encounters.
+}
 function nyanShowcaseSync(){
  if(!nyanShowcaseEnabled())return;
  state.showcase ||= {version:1,enabledAt:Date.now()};
@@ -29,7 +36,7 @@ function nyanShowcaseSync(){
 }
 function nyanShowcaseBanner(){
  let banner=document.querySelector('#nyan-showcase-banner');
- if(!nyanShowcaseEnabled()){banner?.remove();return;}
+ if(!nyanShowcaseEnabled()&&!nyanCatOnlyEnabled()){banner?.remove();return;}
  if(!banner){banner=document.createElement('aside');banner.id='nyan-showcase-banner';banner.className='nyan-showcase-banner';banner.setAttribute('role','note');document.querySelector('.topbar').after(banner);}
- banner.textContent=activeProfile.name+' · HỒ SƠ MINH HỌA V9.4.4 — Mở tự động nội dung và mèo; điểm số không phải thành tích học thật.';
+ banner.textContent=activeProfile.name+(nyanCatOnlyEnabled()?' · MỞ SẴN MÈO — Tiến độ và điểm học tập vẫn ghi nhận thực tế.':' · HỒ SƠ MINH HỌA V9.4.5 — Mở tự động nội dung và mèo; điểm số không phải thành tích học thật.');
 }

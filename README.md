@@ -28,3 +28,6 @@ Hồ sơ minh họa Nyantoeic: đăng nhập trực tiếp bằng mật khẩu d
 
 ## V9.4.4 — Cat Expansion
 Thêm 20 mẫu mèo lấy cảm hứng từ giống mèo, 34 mèo thưởng (13 Rare, 10 Super Rare, 6 Epic, 5 Ultra Rare), 45 mẫu tổng cộng. Mở tối đa 50 mèo, gọi đủ bằng một nút. 64 lời thoại cũ giữ nguyên; không trùng lời thoại được gán cho mèo đang hiện. Giữ ID mèo và sự kiện cũ; thêm 20 mốc thưởng, có thể ghi nhận hồi tố theo tiến độ đã lưu. Tỉ lệ cơ bản 55/27/13/5, tăng theo chuỗi chưa có phần thưởng cấp cao, mỗi 10 lượt ưu tiên cấp cao và bảo đảm UR sau 20 lượt chưa nhận UR nếu còn. Thống kê lượt mới bắt đầu từ bản này. Hồ sơ Nyantoeic tự mở 45 mẫu; hồ sơ thường độc lập. Không cam kết tốc độ 50 mèo trên mọi thiết bị.
+
+## V9.4.5 — Mobile Cat Experience
+Bảng điều khiển nổi trên máy tính, điện thoại, iPad: 0–50 mèo, +1/+5/+10, thu hết, ngủ/thức, kích thước, giảm chuyển động khi đông. Số lượng và lựa chọn lưu riêng theo hồ sơ/trình duyệt. Ẩn khi làm Test, tập trung, mở hộp thoại hoặc menu mobile; tránh thanh đầu và thanh điều hướng. Hồ sơ demo xenxinhdep tự tạo khi đăng nhập, mở sẵn mèo thưởng hiện có và bổ sung sau này, không tạo điểm hoặc tiến độ giả. Mèo cơ bản đã dùng được ngay, ghi nhận gặp thực tế. Mật khẩu demo công khai, không dùng làm mật khẩu thật. Không có đồng bộ đa thiết bị. Cần kiểm thử iOS/Android thật.

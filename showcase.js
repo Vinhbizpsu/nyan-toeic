@@ -38,5 +38,5 @@ function nyanShowcaseBanner(){
  let banner=document.querySelector('#nyan-showcase-banner');
  if(!nyanShowcaseEnabled()&&!nyanCatOnlyEnabled()){banner?.remove();return;}
  if(!banner){banner=document.createElement('aside');banner.id='nyan-showcase-banner';banner.className='nyan-showcase-banner';banner.setAttribute('role','note');document.querySelector('.topbar').after(banner);}
- banner.textContent=activeProfile.name+(nyanCatOnlyEnabled()?' · MỞ SẴN MÈO — Tiến độ và điểm học tập vẫn ghi nhận thực tế.':' · HỒ SƠ MINH HỌA V9.4.5 — Mở tự động nội dung và mèo; điểm số không phải thành tích học thật.');
+ banner.textContent=activeProfile.name+(nyanCatOnlyEnabled()?' · MỞ SẴN MÈO — Tiến độ và điểm học tập vẫn ghi nhận thực tế.':' · HỒ SƠ MINH HỌA V9.4.6 — Mở tự động nội dung và mèo; điểm số không phải thành tích học thật.');
 }

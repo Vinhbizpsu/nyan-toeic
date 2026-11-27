@@ -31,3 +31,6 @@ Thêm 20 mẫu mèo lấy cảm hứng từ giống mèo, 34 mèo thưởng (13 
 
 ## V9.4.5 — Mobile Cat Experience
 Bảng điều khiển nổi trên máy tính, điện thoại, iPad: 0–50 mèo, +1/+5/+10, thu hết, ngủ/thức, kích thước, giảm chuyển động khi đông. Số lượng và lựa chọn lưu riêng theo hồ sơ/trình duyệt. Ẩn khi làm Test, tập trung, mở hộp thoại hoặc menu mobile; tránh thanh đầu và thanh điều hướng. Hồ sơ demo xenxinhdep tự tạo khi đăng nhập, mở sẵn mèo thưởng hiện có và bổ sung sau này, không tạo điểm hoặc tiến độ giả. Mèo cơ bản đã dùng được ngay, ghi nhận gặp thực tế. Mật khẩu demo công khai, không dùng làm mật khẩu thật. Không có đồng bộ đa thiết bị. Cần kiểm thử iOS/Android thật.
+
+## V9.4.6 — Smooth Cats
+Dùng một requestAnimationFrame chung, hạn chế đọc layout, bỏ ghi transform khi không đổi, giảm dò va chạm và hoạt ảnh SVG phụ khi thiết bị cảm ứng có từ 12 mèo. Triệu hồi từng nhóm 4 mèo trên thiết bị cảm ứng; desktop vẫn gọi ngay. Giữ tối đa 50, thao tác cảm ứng, bộ sưu tập và hồ sơ. Không khẳng định FPS thực tế trước khi kiểm tra trên thiết bị.

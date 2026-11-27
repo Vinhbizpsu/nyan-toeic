@@ -25,3 +25,6 @@ V9.2: 14 mèo phần thưởng (5 Rare, 4 Super Rare, 3 Epic, 2 Ultra Rare), kh�
 
 ## V9.4.3
 Hồ sơ minh họa Nyantoeic: đăng nhập trực tiếp bằng mật khẩu demo đã cấp; lần đầu trên mỗi trình duyệt tự tạo hồ sơ cục bộ. Không có quyền Admin, không phải điểm thật. Tên dành riêng cho minh họa, không dùng để học thật. Giữ showcase.js và các hook khi nâng cấp; cấu trúc Part 6/7 mới cần tích hợp riêng. Nếu đã có hồ sơ cùng tên, dùng mật khẩu hiện có hoặc chức năng quên mật khẩu. Đóng tất cả tab/PWA để cập nhật cache, không xóa dữ liệu trang web.
+
+## V9.4.4 — Cat Expansion
+Thêm 20 mẫu mèo lấy cảm hứng từ giống mèo, 34 mèo thưởng (13 Rare, 10 Super Rare, 6 Epic, 5 Ultra Rare), 45 mẫu tổng cộng. Mở tối đa 50 mèo, gọi đủ bằng một nút. 64 lời thoại cũ giữ nguyên; không trùng lời thoại được gán cho mèo đang hiện. Giữ ID mèo và sự kiện cũ; thêm 20 mốc thưởng, có thể ghi nhận hồi tố theo tiến độ đã lưu. Tỉ lệ cơ bản 55/27/13/5, tăng theo chuỗi chưa có phần thưởng cấp cao, mỗi 10 lượt ưu tiên cấp cao và bảo đảm UR sau 20 lượt chưa nhận UR nếu còn. Thống kê lượt mới bắt đầu từ bản này. Hồ sơ Nyantoeic tự mở 45 mẫu; hồ sơ thường độc lập. Không cam kết tốc độ 50 mèo trên mọi thiết bị.

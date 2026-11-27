@@ -31,5 +31,5 @@ function nyanShowcaseBanner(){
  let banner=document.querySelector('#nyan-showcase-banner');
  if(!nyanShowcaseEnabled()){banner?.remove();return;}
  if(!banner){banner=document.createElement('aside');banner.id='nyan-showcase-banner';banner.className='nyan-showcase-banner';banner.setAttribute('role','note');document.querySelector('.topbar').after(banner);}
- banner.textContent=activeProfile.name+' · HỒ SƠ MINH HỌA V9.4.3 — Mở tự động nội dung và mèo; điểm số không phải thành tích học thật.';
+ banner.textContent=activeProfile.name+' · HỒ SƠ MINH HỌA V9.4.4 — Mở tự động nội dung và mèo; điểm số không phải thành tích học thật.';
 }

@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   if(typeof document==='undefined'||typeof matchMedia!=='function')return;
-  const VISIT_EVERY=360000,VISIT_LENGTH=300000,EXIT_MS=2400,ROLL_MS=380,MAX_CATS=30;
+  const VISIT_EVERY=360000,VISIT_LENGTH=300000,EXIT_MS=2400,ROLL_MS=380,MAX_CATS=50;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
   let elapsed=0,last=performance.now(),blockedBefore=true,round=-1,groupSize=1,visiting=false,serial=0;
@@ -25,7 +25,7 @@
     {id:'ragdoll',name:'Mèo Ragdoll',fur:'#f7eee5',body:'#e9ded5',leg:'#c2ad9f',tail:'#a98e80',belly:'#fff6ed',mark:'#b5a093',ink:'#63564f',face:'#4b83b7',pattern:'point',fluffy:true},
     {id:'maine',name:'Mèo Maine Coon',fur:'#c8a78b',body:'#b49074',leg:'#ab866b',tail:'#92715c',belly:'#e9d3b9',mark:'#795942',ink:'#5f4638',face:'#526039',fluffy:true,pattern:'stripe'}
   ];
-  const pickCoat=()=>{const pool=coats.concat(nyanOwnedCats());return pool[Math.floor(Math.random()*pool.length)];};
+  const usedCoats=new Set();const pickCoat=()=>{const pool=coats.concat(nyanOwnedCats());let fresh=pool.filter(c=>!usedCoats.has(c.id));if(!fresh.length){usedCoats.clear();fresh=pool;}const c=fresh[Math.floor(Math.random()*fresh.length)];usedCoats.add(c.id);return c;};
   const random=(a,b)=>a+Math.random()*(b-a);
 
   function colorArt(html,c){
@@ -33,6 +33,8 @@
     const bodyMarks=c.pattern==='spots'?`<g fill="none" stroke="${c.mark}" stroke-width="2.8"><ellipse cx="52" cy="69" rx="5" ry="4"/><ellipse cx="67" cy="62" rx="5" ry="4"/><ellipse cx="78" cy="75" rx="5" ry="4"/><ellipse cx="93" cy="66" rx="4" ry="5"/></g>`:c.id==='calico'?'<path d="M43 63Q49 52 64 53L70 61Q74 73 60 79Q47 80 41 70Z" fill="#e2a166" stroke="none"/><path d="M81 53Q96 55 105 65L102 78Q91 83 84 76Z" fill="#45434b" stroke="none"/>':c.id==='tabby'||c.id==='gold'||c.pattern==='stripe'?`<path d="M53 59q8 4 9 11m7-15q7 6 7 13m8-11q6 5 7 10" stroke="${c.mark}" stroke-width="4" stroke-linecap="round" fill="none"/>`:'';
     html=html.replace('<path d="m-26-26',headMarks+'<path d="m-26-26').replace('rx="34" ry="20" fill="#f5e5c8"/>','rx="34" ry="20" fill="#f5e5c8"/>'+bodyMarks);
     if(c.fluffy)html=html.replace('<path d="m-26-26',`<path d="M-29 8l-5 7 7 1-1 7 9-1 3 6 8-3M29 8l5 7-7 1 1 7-9-1-3 6-8-3" stroke="${c.ink}" fill="${c.fur}" stroke-width="2"/><path d="m-26-26`);
+    if(c.shape==='fold')html=html.replace('M-29-8-32-29Q-33-35-27-32L-9-21Q0-24 9-21L27-32Q33-35 32-29L29-8','M-29-8Q-38-21-26-22L-9-21Q0-24 9-21L26-22Q38-21 29-8');
+    if(c.shape==='short')html=html.replaceAll('v14q5 8 12 0V76','v8q5 8 12 0V76').replaceAll('v14q6 8 13 0V78','v8q6 8 13 0V78');
     if(c.shape==='curl')html=html.replace('M-29-8-32-29Q-33-35-27-32L-9-21Q0-24 9-21L27-32Q33-35 32-29L29-8','M-29-8Q-42-35-26-30L-9-21Q0-24 9-21L26-30Q42-35 29-8');
     if(['bare','rex','tick'].includes(c.shape))html=html.replace('M-29-8-32-29Q-33-35-27-32L-9-21Q0-24 9-21L27-32Q33-35 32-29L29-8','M-29-8-38-37Q-39-42-31-38L-9-21Q0-24 9-21L31-38Q39-42 38-37L29-8');
     if(['van','bob','wolf','bare','rex','waves','tick','fox'].includes(c.shape)){const detail=['van','bob'].includes(c.shape)?`<path d="M-28-25-10-18-18-5-30-8ZM28-25 10-18 18-5 30-8Z" fill="${c.mark}" stroke="none"/>`:c.shape==='wolf'?`<path d="M-29-8Q-14-20 0-7Q14-20 29-8L24 14 0 22-24 14Z" fill="${c.mark}" stroke="none"/>`:`<path d="M-14-15q4-5 8 0t8 0t8 0M-9-9q4-4 8 0t8 0" stroke="${c.mark}" stroke-width="2" fill="none"/>`;html=html.replace('<path d="m-26-26',detail+'<path d="m-26-26');}
@@ -129,14 +131,16 @@
     const api={update,finish,leave,resize,near:(tx,ty)=>phase==='visit'&&!host.hidden&&Math.hypot(tx-x,ty-y)<size().w*.85};
     cats.add(api);show(true);return api;
   }
-  function tick(){const now=performance.now(),paused=blocked();if(!paused&&!blockedBefore)elapsed+=Math.max(0,now-last);last=now;blockedBefore=paused;
+  let lastProfile=activeProfile.id;
+  function tick(){if(lastProfile!==activeProfile.id){lastProfile=activeProfile.id;for(const cat of cats)cat.finish();usedCoats.clear();groupSize=1;round=-1;elapsed=0;blockedBefore=true;last=performance.now();}const now=performance.now(),paused=blocked();if(!paused&&!blockedBefore)elapsed+=Math.max(0,now-last);last=now;blockedBefore=paused;
     if(paused){for(const cat of cats)cat.update(true);return;}
     const current=Math.floor(elapsed/VISIT_EVERY),inVisit=elapsed%VISIT_EVERY<VISIT_LENGTH;
-    if(current!==round){for(const cat of cats)cat.finish();round=current;visiting=inVisit;if(inVisit)for(let i=0;i<groupSize;i++)createCat(i);}
+    if(current!==round){for(const cat of cats)cat.finish();round=current;usedCoats.clear();visiting=inVisit;if(inVisit)for(let i=0;i<groupSize;i++)createCat(i);}
     else if(visiting&&!inVisit){visiting=false;for(const cat of cats)cat.leave();}
     for(const cat of cats)cat.update(false);
   }
-  window.nyanSummonCat=(announce=false)=>{tick();if(blocked()){if(announce)say('Mèo đang nghỉ hoặc bị ẩn bởi chế độ tập trung/giảm chuyển động.');return false;}if(groupSize>=MAX_CATS){if(announce)say('Đã đủ 30 mèo.');return false;}const slot=groupSize++;if(visiting)createCat(slot);if(announce)say(visiting?'Đã gọi thêm một mèo.':'Mèo mới sẽ xuất hiện ở lượt đi chơi tiếp theo.');return true;};
+  window.nyanSummonCat=(announce=false)=>{tick();if(blocked()){if(announce)say('Mèo đang nghỉ hoặc bị ẩn bởi chế độ tập trung/giảm chuyển động.');return false;}if(groupSize>=MAX_CATS){if(announce)say('Đã đủ 50 mèo.');return false;}const slot=groupSize++;if(visiting)createCat(slot);if(announce)say(visiting?'Đã gọi thêm một mèo.':'Mèo mới sẽ xuất hiện ở lượt đi chơi tiếp theo.');return true;};
+  window.nyanSummonAllCats=()=>{tick();if(blocked()){say('Mèo đang nghỉ hoặc bị ẩn bởi chế độ tập trung/giảm chuyển động.');return false;}if(groupSize>=MAX_CATS){say('Đã đủ 50 mèo.');return false;}while(groupSize<MAX_CATS){const slot=groupSize++;if(visiting)createCat(slot);}say(visiting?'Đã gọi đủ đàn 50 mèo.':'Đàn 50 mèo sẽ xuất hiện ở lượt đi chơi tiếp theo.');return true;};
   window.addEventListener('keydown',e=>{
     if(e.defaultPrevented||e.repeat||e.isComposing||!e.ctrlKey||!e.altKey||e.shiftKey||e.metaKey||e.code!=='KeyM'||e.getModifierState('AltGraph'))return;
     if(e.target instanceof Element&&e.target.closest('input,textarea,select,[contenteditable]:not([contenteditable=false])'))return;

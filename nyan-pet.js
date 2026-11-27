@@ -18,9 +18,11 @@
   function runFrame(t){frameId=0;if(blockedBefore)return;for(const cat of movers)cat(t);queueFrame();}
   function refreshGeometry(){const now=performance.now();if(geometry&&now-geometryAt<250)return geometry;const root=document.documentElement,bar=document.querySelector('.topbar'),nav=document.querySelector('#ui91-bottom');geometry={w:root.clientWidth,h:root.clientHeight,top:Math.max(0,bar?.getBoundingClientRect().bottom||0),bottom:nav?nav.getBoundingClientRect().height:0};geometryAt=now;return geometry;}
   function invalidateGeometry(){geometry=null;}
-  function cancelSpawn(){if(spawnTimer){clearTimeout(spawnTimer);spawnTimer=0;}}
+  let seenDirty=false;
+  function flushSeen(){if(seenDirty){seenDirty=false;save();}}
+  function cancelSpawn(){if(spawnTimer){clearTimeout(spawnTimer);spawnTimer=0;}flushSeen();}
   let filling=false;
-  function fillGroup(){filling=true;if(!visiting||blockedBefore||blocked()||spawnTimer)return;let count=0;const batch=touchDevice?4:MAX_CATS;while(cats.size<groupSize&&count<batch){createCat(cats.size);count++;}if(cats.size<groupSize)spawnTimer=setTimeout(()=>{spawnTimer=0;fillGroup();},60);else filling=false;}
+  function fillGroup(){filling=true;if(!visiting||blockedBefore||blocked()||spawnTimer)return;let count=0;const batch=touchDevice?4:MAX_CATS;while(cats.size<groupSize&&count<batch){createCat(cats.size);count++;}if(cats.size<groupSize)spawnTimer=setTimeout(()=>{spawnTimer=0;fillGroup();},60);else {filling=false;flushSeen();}}
   const sleepKey=window.NyanPlatform.themeKey().replace("theme","pets.sleep");
   let sleeping=false;try{sleeping=localStorage.getItem(sleepKey)==='1';}catch{}
   const toggle=document.querySelector("#pet-toggle");
@@ -69,7 +71,7 @@
   function openControl(open){panel.hidden=!open;launch.setAttribute('aria-expanded',String(open));if(!open)sliding=false;}
   function updateControl(){const hide=controlBlocked();if(control.hidden!==hide)control.hidden=hide;if(hide&&!panel.hidden)openControl(false);if(!sliding){range.value=String(groupSize);setText(panel.querySelector('[data-cat-preview]'),String(groupSize));}setText(control.querySelector('[data-cat-count]'),String(groupSize));setText(control.querySelector('[data-cat-act=sleep]'),sleeping?'Đánh thức':'Cho mèo ngủ');control.querySelector('[data-cat-size]').value=prefs.size;control.querySelector('[data-cat-eco]').checked=prefs.eco;setText(control.querySelector('[data-cat-status]'),sleeping?'Mèo đang ngủ':visiting?'Đang đi chơi · '+cats.size+' mèo':'Đang nghỉ · số đã chọn áp dụng lượt sau');}
   function createCat(slot){
-    const host=document.createElement('div');++serial;const coat=pickCoat();if(typeof v9CatSeen==='function')v9CatSeen(coat.id);
+    const host=document.createElement('div');++serial;const coat=pickCoat();if(typeof v9CatSeen==='function'&&v9CatSeen(coat.id,true))seenDirty=true;
     host.className='nyan-pet';host.hidden=true;host.dataset.pose='walk';host.dataset.slot=String(slot);host.dataset.coat=coat.id;
     host.innerHTML=colorArt(`<button type="button" class="pet-touch" aria-label="${coat.name}; giữ để vuốt ve, kéo để nhấc mèo" title="${coat.name} · giữ để vuốt ve · kéo để nhấc"><svg class="pet-art" viewBox="0 0 140 110" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -122,7 +124,7 @@
     function startFrame(){if(!host.hidden&&!blockedBefore&&!(reduced.matches&&pose==='idle'&&!held)){movers.add(move);queueFrame();}}
     function finish(){if(phase==='done')return;cancelHold();phase='done';stopFrame();host.remove();cats.delete(api);}
     function leave(){if(phase!=='visit')return;cancelHold();if(reduced.matches||blocked()){finish();return;}phase='leaving';entering=false;host.dataset.entering='false';exitAt=elapsed+EXIT_MS;host.classList.add('leaving');targetX=x<innerWidth/2?-(size().w+12):innerWidth+12;face=targetX<x?-1:1;setPose('walk');startFrame();}
-    function move(t){if(host.hidden||blockedBefore||phase==='done'||(reduced.matches&&pose==='idle'&&!held)){stopFrame();return;}const interval=mobileCrowd()?28:0;if(interval&&lastFrame&&t-lastFrame<interval)return;const dt=lastFrame?Math.min(.1,(t-lastFrame)/1000):0;lastFrame=t;
+    function move(t){if(host.hidden||blockedBefore||phase==='done'||(reduced.matches&&pose==='idle'&&!held)){stopFrame();return;}const interval=mobileCrowd()?28:ecoMode()?48:0;if(interval&&lastFrame&&t-lastFrame<interval)return;const dt=lastFrame?Math.min(.1,(t-lastFrame)/1000):0;lastFrame=t;
       if(phase==='leaving'){const dx=targetX-x;x+=Math.sign(dx)*Math.min(Math.abs(dx),Math.max(180,innerWidth*.65)*dt);if(Math.abs(targetX-x)<1){finish();return;}}
       else if(entering&&!held){const dx=targetX-x,step=Math.min(Math.abs(dx),170*dt);x+=Math.sign(dx)*step;if(Math.abs(targetX-x)<1){entering=false;host.dataset.entering='false';walk();}}
       else if(!held){
@@ -181,7 +183,7 @@
     if(e.target instanceof Element&&e.target.closest('input,textarea,select,[contenteditable]:not([contenteditable=false])'))return;
     if(window.nyanSummonCat())e.preventDefault();
   });
-  let resizeTimer=0;window.addEventListener('resize',()=>{invalidateGeometry();clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{for(const cat of cats)cat.resize();},100);});window.addEventListener('scroll',invalidateGeometry,{passive:true});
+  let resizeTimer=0;window.addEventListener('resize',()=>{invalidateGeometry();clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{for(const cat of cats)cat.resize();},100);});window.addEventListener('scroll',invalidateGeometry,{passive:true});window.addEventListener('pagehide',flushSeen);
   window.addEventListener('hashchange',tick);document.addEventListener('visibilitychange',tick);
   const main=document.querySelector('main');new MutationObserver(tick).observe(main,{childList:true});
   function renderToggle(){toggle.textContent=sleeping?'Mèo dậy đi chơi':'Mèo đi ngủ';toggle.setAttribute('aria-pressed',String(sleeping));toggle.title=sleeping?'Hiện mèo đi dạo':'Ẩn mèo đi dạo';document.documentElement.classList.toggle('pets-asleep',sleeping);}

@@ -34,3 +34,4 @@ Bảng điều khiển nổi trên máy tính, điện thoại, iPad: 0–50 mè
 
 ## V9.4.6 — Smooth Cats
 Dùng một requestAnimationFrame chung, hạn chế đọc layout, bỏ ghi transform khi không đổi, giảm dò va chạm và hoạt ảnh SVG phụ khi thiết bị cảm ứng có từ 12 mèo. Triệu hồi từng nhóm 4 mèo trên thiết bị cảm ứng; desktop vẫn gọi ngay. Giữ tối đa 50, thao tác cảm ứng, bộ sưu tập và hồ sơ. Không khẳng định FPS thực tế trước khi kiểm tra trên thiết bị.
+Gộp ghi nhận mèo mới trong đợt triệu hồi để tránh lưu toàn bộ tiến độ nhiều lần; lưu ngay khi hoàn tất, khi tạm dừng hoặc rời trang. Giữ chế độ desktop cũ.

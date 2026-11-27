@@ -309,7 +309,7 @@ html,body,button,input,select,textarea{font-family:var(--font-body);font-variant
 @media(max-height:500px){.nyan-cat-panel{max-height:42vh}}
 
 /* V9.4.6: preserve walking positions while reducing SVG animation workload on touch devices. */
-.nyan-pet-layer.nyan-mobile-crowd .nyan-pet{contain:layout style paint;will-change:transform}
+.nyan-pet-layer.nyan-mobile-crowd .nyan-pet{contain:layout style;will-change:transform}
 .nyan-pet-layer.nyan-mobile-crowd .nyan-pet .pet-art{filter:none;transition:none}
 .nyan-pet-layer.nyan-mobile-crowd .nyan-pet .walk-leg,.nyan-pet-layer.nyan-mobile-crowd .nyan-pet .walk-tail,.nyan-pet-layer.nyan-mobile-crowd .nyan-pet .pet-body,.nyan-pet-layer.nyan-mobile-crowd .nyan-pet .groom-head,.nyan-pet-layer.nyan-mobile-crowd .nyan-pet .groom-paw,.nyan-pet-layer.nyan-mobile-crowd .nyan-pet .groom-tongue{animation:none!important}
 .nyan-pet-layer.nyan-mobile-crowd .nyan-pet.is-held{contain:layout style}

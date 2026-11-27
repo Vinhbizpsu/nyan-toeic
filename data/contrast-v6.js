@@ -1,0 +1,27 @@
+/* Original contrast examples. Short study cues; do not treat them as exhaustive rules. */
+window.nyanContrasts={
+ 'khung-cau':['Tìm vị ngữ của từng mệnh đề','The files that Maya checked are ready.','Checked thuộc mệnh đề quan hệ; are là động từ chính. Không đếm động từ rồi loại máy móc.'],
+ 'ho-tu':['Vị trí trước, hậu tố sau','an accurate estimate / estimate costs','Estimate có thể là danh từ hoặc động từ; đọc cả cụm, đừng chỉ nhìn đuôi.'],
+ 'cum-danh-tu':['Từ chính và từ bổ nghĩa','a list of suppliers / supplier lists','List và lists là từ chính ở hai cụm này. Of suppliers không quyết định hòa hợp của list.'],
+ 'tinh-tu':['Động từ nối khác động từ hành động','The plan looks promising. / She looked carefully at the plan.','Promising mô tả plan; carefully mô tả cách nhìn.'],
+ 'trang-tu':['Không phải mọi trạng từ đều có -ly','work hard / hardly work','Hard = chăm chỉ; hardly = hầu như không. Nghĩa khác hẳn nhau.'],
+ 'hoa-hop-chu-vi':['Bỏ cụm chen giữa','The number of orders is rising. / A number of orders are late.','The number chỉ con số; a number of nghĩa là nhiều.'],
+ 'thi-don-tiep-dien':['Sự kiện và quá trình','She called at noon. / She was working at noon.','Quá khứ đơn nêu sự kiện; tiếp diễn nêu quá trình tại mốc.'],
+ 'thi-hoan-thanh':['Mốc đã kết thúc và kết quả đến nay','We shipped it yesterday. / We have shipped three orders so far.','Yesterday là mốc quá khứ đã kết thúc; so far nối đến hiện tại.'],
+ 'the-chu-dong-bi-dong':['Có by/to không đồng nghĩa bị động','The shipment arrived at noon. / The shipment was inspected at noon.','Arrive là nội động từ trong nghĩa này; inspect có thể dùng bị động.'],
+ 'dang-dong-tu':['Hai chức năng của to','agree to review / look forward to reviewing','To trong agree to review thuộc nguyên mẫu; trong look forward to là giới từ.'],
+ 'gioi-tu':['Hạn cuối và khoảng kéo dài','Submit it by Friday. / Stay here until Friday.','By: chậm nhất; until: tiếp tục đến một mốc.'],
+ 'lien-tu-tu-noi':['Nhìn cấu trúc và ý nghĩa','Although costs rose, sales held steady. / Despite higher costs, sales held steady.','Mệnh đề hữu hạn sau although; cụm danh từ sau despite. However thường nối ý tương phản bằng dấu câu thích hợp.'],
+ 'menh-de-quan-he':['Chức năng trong mệnh đề','the analyst who called / the analyst whose report arrived','Who làm chủ ngữ của called; whose hạn định danh từ report.'],
+ 'menh-de-rut-gon':['Danh từ thực hiện hay nhận tác động?','the staff reviewing files / the files reviewed by staff','Reviewing mang nghĩa chủ động; reviewed ở cụm này mang nghĩa bị động.'],
+ 'cau-truc-song-song':['Giữ chức năng tương đương','to check, revise, and approve / checking, revising, and approving','Các thành phần cùng chức năng; không bắt buộc phải giống mọi hậu tố trong mọi danh sách.'],
+ 'articles-countability':['Chọn theo âm, không theo chữ','an hour / a university','Hour bắt đầu bằng âm nguyên âm; university bắt đầu bằng âm /j/.'],
+ 'quantifiers':['Đếm đơn vị hay đo lượng?','many orders / much information','Orders đếm được số nhiều; information không đếm được trong cách dùng này.'],
+ 'pronouns':['Sở hữu trước danh từ hoặc đứng độc lập','their invoices / the invoices are theirs','Their đứng trước danh từ; theirs thay cho cả cụm danh từ sở hữu.'],
+ 'comparisons':['Phân biệt ngang bằng và hơn','as efficient as / more efficient than','As … as chỉ ngang bằng; more … than chỉ hơn.'],
+ 'workplace-collocations':['Học theo cụm','eligible for a refund / comply with a policy','Đừng chọn giới từ dựa riêng vào nghĩa tiếng Việt.'],
+ 'context-vocabulary':['Dấu hiệu phân xử nghĩa','waive a fee / collect a fee','Waive = miễn; collect = thu. Nếu khách không phải trả, waive thường phù hợp.'],
+ 'ets-result-patterns':['Kiểm tra trật tự từ','so useful that … / such a useful guide that …','So + Adj; such + cụm danh từ. Còn có cấu trúc so + Adj + a/an + N trong văn phong trang trọng.'],
+ 'ets-preposition-relative':['Khôi phục giới từ gốc','the room in which we met / the person with whom we spoke','In the room; with the person. That không đứng trực tiếp sau giới từ trong mẫu này.'],
+ 'ets-anticipatory-it':['It giả khác đại từ sở hữu','It is easy to use. / We find it easy to use.','It ở hai mẫu này lần lượt là chủ ngữ giả và tân ngữ giả; không dùng its thay cho it.']
+};
